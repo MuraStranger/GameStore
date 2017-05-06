@@ -28,7 +28,8 @@ namespace GameStore.Pages
         {
             get
             {
-                return (int)Math.Ceiling((decimal)repository.Games.Count() / pageSize);
+                int prodCount = FilterGames().Count();
+                return (int)Math.Ceiling((decimal)prodCount / pageSize);
             }
         }
 
@@ -42,10 +43,20 @@ namespace GameStore.Pages
 
         protected IEnumerable<Game> GetGames()
         {
-            return repository.Games
+            return FilterGames()
                 .OrderBy(g => g.GameId)
                 .Skip((CurrentPage - 1) * pageSize)
                 .Take(pageSize);
+        }
+
+        // Новый вспомогательный метод для фильтрации игр по категориям
+        private IEnumerable<Game> FilterGames()
+        {
+            IEnumerable<Game> games = repository.Games;
+            string currentCategory = (string)RouteData.Values["category"] ??
+                Request.QueryString["category"];
+            return currentCategory == null ? games :
+                games.Where(p => p.Category == currentCategory);
         }
 
         protected void Page_Load(object sender, EventArgs e)
