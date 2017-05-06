@@ -19,18 +19,25 @@ namespace GameStore.Pages
             get
             {
                 int page;
-                page = int.TryParse(Request.QueryString["page"], out page) ? page : 1;
+                page = GetPageFromRequest();
                 return page > MaxPage ? MaxPage : page;
             }
         }
 
-        // Новое свойство, возвращающее наибольший номер допустимой страницы
         protected int MaxPage
         {
             get
             {
                 return (int)Math.Ceiling((decimal)repository.Games.Count() / pageSize);
             }
+        }
+
+        private int GetPageFromRequest()
+        {
+            int page;
+            string reqValue = (string)RouteData.Values["page"] ??
+                Request.QueryString["page"];
+            return reqValue != null && int.TryParse(reqValue, out page) ? page : 1;
         }
 
         protected IEnumerable<Game> GetGames()
